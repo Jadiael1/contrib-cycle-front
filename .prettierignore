@@ -1,0 +1,7 @@
+node_modules
+dist
+.next
+coverage
+.eslintcache
+pnpm-lock.yaml
+.git

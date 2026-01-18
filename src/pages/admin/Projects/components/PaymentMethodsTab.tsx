@@ -28,6 +28,7 @@ import {
 	Trash2,
 } from "lucide-react";
 import { useState } from "react";
+import CreatePaymentMethod from "@/pages/admin/Projects/components/CreatePaymentMethod";
 
 const PaymentMethodsTab = ({ projectId }: { projectId: number }) => {
 	const { toast } = useToast();
@@ -48,6 +49,8 @@ const PaymentMethodsTab = ({ projectId }: { projectId: number }) => {
 		useState(false);
 	const [paymentMethodToRemove, setPaymentMethodToRemove] =
 		useState<ICollectiveProjectPaymentMethod | null>(null);
+	const [isCreatePaymentMethodModalOpen, setIsCreatePaymentMethodModalOpen] =
+		useState(false);
 
 	const { adminToken } = useAuth();
 	const { data, isLoading, error, refetch } = useAdminPaymentMethods(
@@ -64,9 +67,9 @@ const PaymentMethodsTab = ({ projectId }: { projectId: number }) => {
 	);
 	const removePaymentMutation = useRemovePaymentMethod(projectId, adminToken!);
 
-	const handleDeactivatePaymentMethod = (paymentMethodId: number) => {
+	const handleDeactivatePaymentMethod = async (paymentMethodId: number) => {
 		try {
-			deactivatePaymentMutation.mutateAsync(paymentMethodId);
+			await deactivatePaymentMutation.mutateAsync(paymentMethodId);
 			if (deactivatePaymentMutation.error) {
 				throw new Error(
 					`HTTP error! status: ${deactivatePaymentMutation.error.message}`,
@@ -86,11 +89,12 @@ const PaymentMethodsTab = ({ projectId }: { projectId: number }) => {
 		} finally {
 			setIsDeactivatePaymentMethodModalOpen(false);
 			setPaymentMethodToDeactivate(null);
+			deactivatePaymentMutation.reset();
 		}
 	};
-	const handleActivatePaymentMethod = (paymentMethodId: number) => {
+	const handleActivatePaymentMethod = async (paymentMethodId: number) => {
 		try {
-			activatePaymentMutation.mutateAsync(paymentMethodId);
+			await activatePaymentMutation.mutateAsync(paymentMethodId);
 			if (activatePaymentMutation.error) {
 				throw new Error(
 					`HTTP error! status: ${activatePaymentMutation.error.message}`,
@@ -110,12 +114,13 @@ const PaymentMethodsTab = ({ projectId }: { projectId: number }) => {
 		} finally {
 			setIsActivatePaymentMethodModalOpen(false);
 			setPaymentMethodToActivate(null);
+			activatePaymentMutation.reset();
 		}
 	};
 
-	const handleRemovePaymentMethod = (paymentMethodId: number) => {
+	const handleRemovePaymentMethod = async (paymentMethodId: number) => {
 		try {
-			removePaymentMutation.mutateAsync(paymentMethodId);
+			await removePaymentMutation.mutateAsync(paymentMethodId);
 			if (removePaymentMutation.error) {
 				throw new Error(
 					`HTTP error! status: ${removePaymentMutation.error.message}`,
@@ -135,6 +140,7 @@ const PaymentMethodsTab = ({ projectId }: { projectId: number }) => {
 		} finally {
 			setIsRemovePaymentMethodModalOpen(false);
 			setPaymentMethodToRemove(null);
+			removePaymentMutation.reset();
 		}
 	};
 
@@ -164,6 +170,9 @@ const PaymentMethodsTab = ({ projectId }: { projectId: number }) => {
 					<Button
 						size="sm"
 						className="bg-cosmic-purple hover:bg-cosmic-purple/80 text-star-white shadow-glow-accent/20 cursor-pointer h-9 px-4"
+						onClick={() => {
+							setIsCreatePaymentMethodModalOpen(true);
+						}}
 					>
 						<Plus className="h-4 w-4 mr-2" />
 						<span className="hidden sm:inline">Novo Método</span>
@@ -292,6 +301,12 @@ const PaymentMethodsTab = ({ projectId }: { projectId: number }) => {
 					/>
 				)}
 			</CardContent>
+
+			<CreatePaymentMethod
+				closeModal={() => setIsCreatePaymentMethodModalOpen(false)}
+				isCreatePaymentMethodModalOpen={isCreatePaymentMethodModalOpen}
+				projectId={projectId}
+			/>
 
 			{/* Deactivate Payment Method Modal */}
 			{paymentMethodToDeactivate && isDeactivatePaymentMethodModalOpen ? (

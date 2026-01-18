@@ -14,21 +14,15 @@ import {
 import { useToast } from "@/hooks/useToast";
 import { useCreateProject } from "@/hooks/useCreateProject";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import type { TPaymentInterval } from "@/types/TPaymentInterval";
-import { DashboardLayout } from "../DashboardLayout";
+import { DashboardLayout } from "@/pages/admin/DashboardLayout";
 
 export default function AdminProjectNew() {
 	const navigate = useNavigate();
 	const { toast } = useToast();
-	const { adminUser, adminToken } = useAuth();
+	const { adminToken } = useAuth();
 	const createMutation = useCreateProject(adminToken!);
-
-	useEffect(() => {
-		if (!adminUser || !adminToken) {
-			navigate("/admin/login");
-		}
-	}, [adminToken, adminUser, navigate]);
 
 	const [formData, setFormData] = useState({
 		title: "",

@@ -56,6 +56,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 					}
 				} catch (error) {
 					console.error("Auth /me failed:", check.type, error);
+					if (check.type === "admin") {
+						localStorage.removeItem("auth_admin_token");
+						setAdminToken(null);
+						setAdminUser(null);
+					} else {
+						localStorage.removeItem("auth_participant_token");
+						setParticipantToken(null);
+						setParticipantUser(null);
+					}
 				}
 			}
 		});
@@ -111,12 +120,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			}
 			if (role === "admin") {
 				setAdminUser(null);
-				localStorage.removeItem("auth_admin_token");
 				setAdminToken(null);
+				localStorage.removeItem("auth_admin_token");
 			} else {
 				setParticipantUser(null);
-				localStorage.removeItem("auth_participant_token");
 				setParticipantToken(null);
+				localStorage.removeItem("auth_participant_token");
 			}
 		} catch (error) {
 			throw new Error(`HTTP error! error: ${error}`);

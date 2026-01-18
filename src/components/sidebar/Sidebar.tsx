@@ -11,9 +11,9 @@ export const Sidebar = () => {
 	const navigate = useNavigate();
 	const { toast } = useToast();
 
-	const handleLogout = () => {
-		signout("admin", adminToken!);
-		navigate("/admin/login");
+	const handleLogout = async () => {
+		await signout("admin", adminToken!);
+		navigate("/admin/login", { replace: true });
 		toast({
 			title: "Sessão Encerrada",
 			description: "Conexão com o Centro de Comando finalizada.",

@@ -22,11 +22,11 @@ import {
 	Trash2,
 	Users,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { DashboardLayout } from "../DashboardLayout";
+import { DashboardLayout } from "@/pages/admin/DashboardLayout";
 import { useDeleteAdminProject } from "@/hooks/useDeleteAdminProject";
-import ConfirmRemoval from "./ConfirmRemoval";
+import ConfirmRemoval from "@/pages/admin/Projects/components/ConfirmRemoval";
 import type { IAdminProjects } from "@/interfaces/IAdminProjects";
 
 const AdminProjects = () => {
@@ -34,7 +34,7 @@ const AdminProjects = () => {
 	const [isOpenConfirmRemoval, setIsOpenConfirmRemoval] = useState(false);
 	const [projectForRemoval, setProjectForRemoval] =
 		useState<IAdminProjects | null>(null);
-	const { adminUser: me, adminToken } = useAuth();
+	const { adminToken } = useAuth();
 	const {
 		data: projects,
 		isLoading,
@@ -42,13 +42,6 @@ const AdminProjects = () => {
 		refetch,
 	} = useAdminProjects(adminToken!);
 	const deleteAdminProjectMutation = useDeleteAdminProject(adminToken!);
-
-	useEffect(() => {
-		if (!me && !adminToken) {
-			navigate("/admin/login");
-			return;
-		}
-	}, [adminToken, me, navigate]);
 
 	const handleDelete = (projectId: number) => {
 		deleteAdminProjectMutation.mutate(projectId);

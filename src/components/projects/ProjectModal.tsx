@@ -14,6 +14,10 @@ import {
 } from "lucide-react";
 import { Button } from "../ui/Button";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
+const API_BASE_URL_FALLBACK = "http://localhost:8000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || API_BASE_URL_FALLBACK;
+const API_PREFIX = `${API_BASE_URL}/api/v1`;
 
 const ProjectModal = ({
 	setIsOpen,
@@ -23,9 +27,13 @@ const ProjectModal = ({
 	project: ICollectiveProjectPublic;
 }) => {
 	const [activeTab, setActiveTab] = useState<"login" | "register">("login");
-	const [phone, setPhone] = useState("");
+	const [signinPhone, setSigninPhone] = useState("");
+	const [signupPhone, setSignupPhone] = useState("");
+	const [signupName, setSignupName] = useState("");
+	const [signupLastName, setSignupLastName] = useState("");
 	const { signin } = useAuth();
 	const handleClose = () => setIsOpen(false);
+	const { toast } = useToast();
 
 	const titleId = `title`;
 	const loginTabId = `login-tab`;
@@ -37,11 +45,56 @@ const ProjectModal = ({
 		"w-full rounded-lg border border-border bg-space-dust/60 px-4 py-2.5 text-sm text-star-white placeholder:text-star-muted/60 focus-visible:ring-2 focus-visible:ring-cosmic-cyan/50";
 	const labelClassName = "text-xs uppercase tracking-[0.2em] text-star-muted";
 
-	const handleSignIn = () => {
-		signin({ phone: phone });
+	const handleSignIn = async () => {
+		await signin({ phone: signinPhone });
 	};
 
-	const handleSignUp = () => {};
+	const handleSignUp = async () => {
+		if (
+			![signupPhone, signupName, signupLastName].every(
+				(s) => typeof s === "string" && s.trim() !== "",
+			)
+		) {
+			return;
+		}
+		try {
+			const req = await fetch(`${API_PREFIX}/auth/participant/register`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json; charset=UTF-8",
+					Accept: "application/json",
+				},
+				body: JSON.stringify({
+					phone: signupPhone,
+					first_name: signupName,
+					last_name: signupLastName,
+				}),
+			});
+			if (!req.ok) {
+				toast({
+					title: "Erro",
+					description: "Erro ao realizar cadastro, tente novamente mais tarde.",
+					variant: "destructive",
+				});
+				return;
+			}
+			toast({
+				title: "Sucesso",
+				description:
+					"Registrado. Agora você pode participar de um projeto e confirmar sua presença.",
+				variant: "default",
+			});
+			handleClose();
+		} catch (error) {
+			const errMessage =
+				error instanceof Error ? error.message : "unknow error";
+			toast({
+				title: "Erro ao realizar cadastro.",
+				description: errMessage,
+				variant: "destructive",
+			});
+		}
+	};
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -198,8 +251,8 @@ const ProjectModal = ({
 												<Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-cosmic-cyan" />
 												<input
 													id={`login-phone`}
-													value={phone}
-													onChange={(evt) => setPhone(evt.target.value)}
+													value={signinPhone}
+													onChange={(evt) => setSigninPhone(evt.target.value)}
 													type="tel"
 													inputMode="numeric"
 													autoComplete="tel"
@@ -237,6 +290,8 @@ const ProjectModal = ({
 												<Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-cosmic-cyan" />
 												<input
 													id={`register-phone`}
+													value={signupPhone}
+													onChange={(evt) => setSignupPhone(evt.target.value)}
 													type="tel"
 													inputMode="numeric"
 													autoComplete="tel"
@@ -258,6 +313,8 @@ const ProjectModal = ({
 													<User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-cosmic-purple" />
 													<input
 														id={`register-name`}
+														value={signupName}
+														onChange={(evt) => setSignupName(evt.target.value)}
 														type="text"
 														autoComplete="given-name"
 														placeholder="Seu nome"
@@ -277,6 +334,10 @@ const ProjectModal = ({
 													<UserPlus className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-cosmic-purple" />
 													<input
 														id={`register-lastname`}
+														value={signupLastName}
+														onChange={(evt) =>
+															setSignupLastName(evt.target.value)
+														}
 														type="text"
 														autoComplete="family-name"
 														placeholder="Seu sobrenome"

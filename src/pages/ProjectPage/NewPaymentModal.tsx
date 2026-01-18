@@ -106,6 +106,9 @@ export default function NewPaymentModal({
 
 		try {
 			await createMutation.mutateAsync(formData);
+			if (createMutation.error) {
+				throw new Error(`HTTP error! status: ${createMutation.error.message}`);
+			}
 			onSuccess();
 		} catch (err) {
 			const error = err as { message?: string };
@@ -114,6 +117,8 @@ export default function NewPaymentModal({
 				description: error.message || "Erro ao registrar pagamento.",
 				variant: "destructive",
 			});
+		} finally {
+			createMutation.reset();
 		}
 	};
 

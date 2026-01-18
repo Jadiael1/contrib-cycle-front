@@ -48,6 +48,9 @@ const ProjectPage = () => {
 	const handleJoin = async () => {
 		try {
 			await joinMutation.mutateAsync();
+			if (joinMutation.error) {
+				throw new Error(`HTTP error! status: ${joinMutation.error.message}`);
+			}
 			toast({
 				title: "Sucesso",
 				description: "Participação confirmada! Bem-vindo à missão.",
@@ -63,6 +66,7 @@ const ProjectPage = () => {
 			});
 		} finally {
 			setIsJoinConfirmationOpen(false);
+			joinMutation.reset();
 		}
 	};
 

@@ -61,6 +61,11 @@ const ReportsTab = ({
 
 		try {
 			await generateMutation.mutateAsync(payload);
+			if (generateMutation.error) {
+				throw new Error(
+					`HTTP error! status: ${generateMutation.error.message}`,
+				);
+			}
 			toast({
 				title: "Sucesso",
 				description: "Relatório em processamento.",
@@ -74,6 +79,8 @@ const ReportsTab = ({
 				description: "Erro ao gerar relatório.",
 				variant: "destructive",
 			});
+		} finally {
+			generateMutation.reset();
 		}
 	};
 

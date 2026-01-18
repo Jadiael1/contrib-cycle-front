@@ -128,6 +128,9 @@ export default function AdminProjectNew() {
 			const result = await createMutation.mutateAsync(
 				payload as Parameters<typeof createMutation.mutateAsync>[0],
 			);
+			if (createMutation.error) {
+				throw new Error(`HTTP error! status: ${createMutation.error.message}`);
+			}
 			toast({
 				title: "Sucesso",
 				description: "Projeto criado com sucesso!",
@@ -147,6 +150,8 @@ export default function AdminProjectNew() {
 				setErrors(formErrors);
 			}
 			setGeneralError(apiError.message || "Erro ao criar projeto.");
+		} finally {
+			createMutation.reset();
 		}
 	};
 

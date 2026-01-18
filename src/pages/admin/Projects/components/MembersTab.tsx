@@ -54,6 +54,9 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 		if (!memberToRestore) return;
 		try {
 			await restoreMutation.mutateAsync(memberToRestore.user.id);
+			if (restoreMutation.error) {
+				throw new Error(`HTTP error! status: ${restoreMutation.error.message}`);
+			}
 			toast({
 				title: "Sucesso",
 				description: "Membro restaurado com sucesso.",
@@ -68,6 +71,7 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 			});
 		} finally {
 			setMemberToRestore(null);
+			restoreMutation.reset();
 		}
 	};
 
@@ -75,6 +79,9 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 		if (!memberToRemove) return;
 		try {
 			await removeMutation.mutateAsync(memberToRemove.user.id);
+			if (removeMutation.error) {
+				throw new Error(`HTTP error! status: ${removeMutation.error.message}`);
+			}
 			toast({
 				title: "Sucesso",
 				description: "Membro removido com sucesso.",
@@ -88,6 +95,8 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 				description: "Erro ao remover membro.",
 				variant: "destructive",
 			});
+		} finally {
+			removeMutation.reset();
 		}
 	};
 

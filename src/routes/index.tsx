@@ -1,11 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router";
 import routes from "@/routes/routes";
 import NotFound from "@/pages/NotFound";
-import Loading from "@/components/feedback/Loading";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 const AppRoutes = () => {
-	const isLoading = false;
-
 	return (
 		<BrowserRouter>
 			<Routes>
@@ -16,15 +14,15 @@ const AppRoutes = () => {
 							path={path}
 							element={
 								isProtected ? (
-									<div>Protected...</div>
-								) : !isLoading ? (
-									<Component />
+									<ProtectedRoute>
+										<Component />
+									</ProtectedRoute>
 								) : (
-									<Loading />
+									<Component />
 								)
 							}
 						/>
-					)
+					),
 				)}
 				<Route path="*" element={<NotFound />} />
 			</Routes>

@@ -7,7 +7,7 @@ const routesSite: IRoutes[] = [
 		path: "/",
 		component: Home,
 		visibleInDisplay: true,
-		displayName: "Visao geral",
+		displayName: "Home",
 		protected: false,
 		icon: House,
 	},

@@ -1,0 +1,1 @@
+export type TPaymentInterval = "week" | "month" | "year";

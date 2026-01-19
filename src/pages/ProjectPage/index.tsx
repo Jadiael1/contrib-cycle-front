@@ -34,7 +34,11 @@ const ProjectPage = () => {
 	const { toast } = useToast();
 	const { data } = useProject(slug!, participantToken!);
 	const joinMutation = useJoinProject(slug!, participantToken!);
-	const { data: paymentsData } = usePayments(slug!, participantToken!);
+	const { data: paymentsData } = usePayments(
+		slug!,
+		participantToken!,
+		data?.membership.status === "accepted",
+	);
 	if (!data) return;
 	const project = data?.data;
 	const membership = data?.membership;
@@ -44,6 +48,7 @@ const ProjectPage = () => {
 	const isRemoved = membership?.status === "removed";
 	const isParticipant = !!membership?.status;
 	const isFull = stats?.is_full;
+	const isPending = membership?.status === "pending";
 
 	const handleJoin = async () => {
 		try {
@@ -136,6 +141,21 @@ const ProjectPage = () => {
 							</div>
 						</CardContent>
 					</Card>
+					{isPending && (
+						<Card variant="glass" className="mb-6 border-warning/50">
+							<CardContent className="flex items-center gap-3 py-4">
+								<AlertCircle className="h-6 w-6 text-warning" />
+								<div>
+									<p className="font-medium text-warning">
+										Participação pendente
+									</p>
+									<p className="text-sm text-star-muted">
+										Aguarde até que algum administrador aceite sua participação.
+									</p>
+								</div>
+							</CardContent>
+						</Card>
+					)}
 
 					{/* Status Messages */}
 					{isRemoved && (

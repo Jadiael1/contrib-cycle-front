@@ -27,10 +27,11 @@ const fetchData = async (
 	}
 };
 
-export const usePayments = (slug: string, token: string) => {
+export const usePayments = (slug: string, token: string, enabled: boolean) => {
 	const query = useQuery({
 		queryKey: [`payments`, slug],
 		queryFn: () => fetchData(`/projects/${slug}/payments`, token),
+		enabled: enabled,
 	});
 	return query;
 };

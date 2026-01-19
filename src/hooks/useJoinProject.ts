@@ -33,7 +33,7 @@ export const useJoinProject = (projectSlug: string, token: string) => {
 	const mutation = useMutation({
 		mutationFn: () => fetchData(`/projects/${projectSlug}/join`, token),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: [`${projectSlug}-project`] });
+			queryClient.invalidateQueries({ queryKey: ["project", projectSlug] });
 			queryClient.invalidateQueries({ queryKey: ["all-projects"] });
 		},
 	});

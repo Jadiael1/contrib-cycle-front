@@ -28,7 +28,7 @@ const fetchData = async (
 
 export const useProject = (slug: string, token: string) => {
 	const query = useQuery({
-		queryKey: [`${slug}-project`],
+		queryKey: ["project", slug],
 		queryFn: () => fetchData("/projects", slug, token),
 	});
 	return query;

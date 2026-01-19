@@ -35,7 +35,7 @@ export const useCreatePayment = (projectSlug: string, token: string) => {
 		mutationFn: (formData: FormData) =>
 			fetchData(`/projects/${projectSlug}/payments`, token, formData),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: [`payments`] });
+			queryClient.invalidateQueries({ queryKey: ["payments", projectSlug] });
 		},
 	});
 	return mutation;

@@ -37,7 +37,7 @@ export const usePaymentOptions = (
 	if (month) params.set("month", String(month));
 	const queryString = params.toString();
 	const query = useQuery({
-		queryKey: [`project-${slug}-payment-options`],
+		queryKey: ["project-payment-options", slug, year ?? "all", month ?? "all"],
 		queryFn: () =>
 			fetchData(
 				`/projects/${slug}/payment-options${queryString ? `?${queryString}` : ""}`,

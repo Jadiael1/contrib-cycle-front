@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Upload, X } from "lucide-react";
 
 import {
@@ -17,6 +16,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCreatePayment } from "@/hooks/useCreatePayment";
 import { useToast } from "@/hooks/useToast";
 import type { TPaymentInterval } from "@/types/TPaymentInterval";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 
 interface Props {
 	slug: string;
@@ -38,15 +38,13 @@ export default function NewPaymentModal({
 	const currentYear = new Date().getFullYear();
 	const currentMonth = new Date().getMonth() + 1;
 
-	const [year, setYear] = React.useState(String(currentYear));
-	const [month, setMonth] = React.useState(String(currentMonth));
-	const [weekOfMonth, setWeekOfMonth] = React.useState("1");
-	const [sequence, setSequence] = React.useState("1");
-	const [paidAt, setPaidAt] = React.useState(
-		new Date().toISOString().split("T")[0],
-	);
-	const [receipt, setReceipt] = React.useState<File | null>(null);
-	const [errors, setErrors] = React.useState<Record<string, string>>({});
+	const [year, setYear] = useState(String(currentYear));
+	const [month, setMonth] = useState(String(currentMonth));
+	const [weekOfMonth, setWeekOfMonth] = useState("1");
+	const [sequence, setSequence] = useState("1");
+	const [paidAt, setPaidAt] = useState(new Date().toISOString().split("T")[0]);
+	const [receipt, setReceipt] = useState<File | null>(null);
+	const [errors, setErrors] = useState<Record<string, string>>({});
 
 	const { data: options } = usePaymentOptions(
 		slug,
@@ -55,7 +53,16 @@ export default function NewPaymentModal({
 		paymentInterval === "week" ? parseInt(month) : undefined,
 	);
 
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	useEffect(() => {
+		if (paymentInterval !== "week") return;
+		const firstWeek = options?.weeks?.[0]?.value ?? 1;
+		const nextWeek = String(firstWeek);
+		if (weekOfMonth !== nextWeek) {
+			setWeekOfMonth(nextWeek);
+		}
+	}, [month, year, paymentInterval, options?.weeks, weekOfMonth]);
+
+	const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
 			if (file.size > 10 * 1024 * 1024) {
@@ -122,7 +129,7 @@ export default function NewPaymentModal({
 		}
 	};
 
-	const sequenceOptions = React.useMemo(() => {
+	const sequenceOptions = useMemo(() => {
 		if (!options) return [{ value: "1", label: "#1" }];
 		const range = options.sequence_range;
 		return Array.from({ length: range.max - range.min + 1 }, (_, i) => ({
@@ -131,7 +138,7 @@ export default function NewPaymentModal({
 		}));
 	}, [options]);
 
-	const weekOptions = React.useMemo(() => {
+	const weekOptions = useMemo(() => {
 		if (options?.weeks) {
 			return options.weeks.map((w) => ({
 				value: String(w.value),
@@ -139,11 +146,11 @@ export default function NewPaymentModal({
 			}));
 		}
 		return [
-			{ value: "1", label: "1ª Semana" },
-			{ value: "2", label: "2ª Semana" },
-			{ value: "3", label: "3ª Semana" },
-			{ value: "4", label: "4ª Semana" },
-			{ value: "5", label: "5ª Semana" },
+			// { value: "1", label: "Primeira Semana" },
+			// { value: "2", label: "Segunda Semana" },
+			// { value: "3", label: "Terceira Semana" },
+			// { value: "4", label: "Quarta Semana" },
+			// { value: "5", label: "Quinta Semana" },
 		];
 	}, [options]);
 

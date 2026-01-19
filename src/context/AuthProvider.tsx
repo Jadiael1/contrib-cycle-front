@@ -1,4 +1,4 @@
-import { useEffect, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AuthContext } from "@/context/AuthContext";
 import type { IUser } from "@/interfaces/IUser";
 import type { TLoginPayload } from "@/types/TLoginPayload";
@@ -17,24 +17,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 	const [participantToken, setParticipantToken] = useState<string | null>(
 		localStorage.getItem("auth_participant_token"),
 	);
-
-	const [isPending, startTransition] = useTransition();
+	const [isLoading, setIsLoading] = useState(false);
 
 	useEffect(() => {
-		const hasAdminToken = !!adminToken;
-		const hasParticipantToken = !!participantToken;
-		if (!hasAdminToken && !hasParticipantToken) return;
+		(async () => {
+			const hasAdminToken = !!adminToken;
+			const hasParticipantToken = !!participantToken;
+			if (!hasAdminToken && !hasParticipantToken) return;
+			setIsLoading(true);
 
-		const checks = [
-			{ type: "admin", hasToken: hasAdminToken, token: adminToken },
-			{
-				type: "participant",
-				hasToken: hasParticipantToken,
-				token: participantToken,
-			},
-		] as const;
+			const checks = [
+				{ type: "admin", hasToken: hasAdminToken, token: adminToken },
+				{
+					type: "participant",
+					hasToken: hasParticipantToken,
+					token: participantToken,
+				},
+			] as const;
 
-		startTransition(async () => {
 			for (const check of checks) {
 				if (!check.hasToken) continue;
 				try {
@@ -67,7 +67,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 					}
 				}
 			}
-		});
+			setIsLoading(false);
+		})();
 	}, [adminToken, participantToken]);
 
 	const signin = async (payload: TLoginPayload) => {
@@ -141,7 +142,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 				participantUser,
 				signin,
 				signout,
-				isLoading: isPending,
+				isLoading,
 			}}
 		>
 			{children}

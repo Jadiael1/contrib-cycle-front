@@ -28,13 +28,31 @@ import { DashboardLayout } from "@/pages/admin/DashboardLayout";
 import { useDeleteAdminProject } from "@/hooks/useDeleteAdminProject";
 import ConfirmRemoval from "@/pages/admin/Projects/components/ConfirmRemoval";
 import type { IAdminProjects } from "@/interfaces/IAdminProjects";
+import { useDeactivateAdminProject } from "@/hooks/useDeactivateAdminProject";
+import { useActivateAdminProject } from "@/hooks/useActivateAdminProject";
+import { useToast } from "@/hooks/useToast";
+import {
+	Modal,
+	ModalContent,
+	ModalDescription,
+	ModalFooter,
+	ModalHeader,
+	ModalTitle,
+} from "@/components/ui/Modal";
 
 const AdminProjects = () => {
 	const navigate = useNavigate();
 	const [isOpenConfirmRemoval, setIsOpenConfirmRemoval] = useState(false);
 	const [projectForRemoval, setProjectForRemoval] =
 		useState<IAdminProjects | null>(null);
+
+	const [projectToDeactivate, setProjectToDeactivate] =
+		useState<IAdminProjects | null>(null);
+	const [projectToActivate, setProjectToActivate] =
+		useState<IAdminProjects | null>(null);
+
 	const { adminToken } = useAuth();
+	const { toast } = useToast();
 	const {
 		data: projects,
 		isLoading,
@@ -42,10 +60,64 @@ const AdminProjects = () => {
 		refetch,
 	} = useAdminProjects(adminToken!);
 	const deleteAdminProjectMutation = useDeleteAdminProject(adminToken!);
+	const deactivateAdminProjectMutation = useDeactivateAdminProject(adminToken!);
+	const activateAdminProjectMutation = useActivateAdminProject(adminToken!);
 
 	const handleDelete = (projectId: number) => {
 		deleteAdminProjectMutation.mutate(projectId);
 		setProjectForRemoval(null);
+	};
+
+	const handleDeactivate = async () => {
+		if (!projectToDeactivate) return;
+		try {
+			await deactivateAdminProjectMutation.mutateAsync(projectToDeactivate.id);
+			if (deactivateAdminProjectMutation.error) {
+				throw new Error(
+					`HTTP error! status: ${deactivateAdminProjectMutation.error.message}`,
+				);
+			}
+			toast({
+				title: "Sucesso",
+				description: "Projeto desativado com sucesso.",
+				variant: "default",
+			});
+		} catch {
+			toast({
+				title: "Error",
+				description: "Erro ao desativar projeto",
+				variant: "destructive",
+			});
+		} finally {
+			setProjectToDeactivate(null);
+			deactivateAdminProjectMutation.reset();
+		}
+	};
+
+	const handleActivate = async () => {
+		if (!projectToActivate) return;
+		try {
+			await activateAdminProjectMutation.mutateAsync(projectToActivate.id);
+			if (activateAdminProjectMutation.error) {
+				throw new Error(
+					`HTTP error! status: ${activateAdminProjectMutation.error.message}`,
+				);
+			}
+			toast({
+				title: "Sucesso",
+				description: "Projeto ativado com sucesso.",
+				variant: "default",
+			});
+		} catch {
+			toast({
+				title: "Error",
+				description: "Erro ao ativar projeto",
+				variant: "destructive",
+			});
+		} finally {
+			setProjectToActivate(null);
+			activateAdminProjectMutation.reset();
+		}
 	};
 
 	return (
@@ -167,6 +239,42 @@ const AdminProjects = () => {
 												Gerenciar
 											</Button>
 										</Link>
+										{project.is_active ? (
+											<Button
+												variant="ghost"
+												size="icon"
+												className="text-star-muted hover:text-destructive hover:bg-destructive/10 cursor-pointer transition-colors"
+												onClick={() => {
+													setProjectToDeactivate(project);
+												}}
+												disabled={deactivateAdminProjectMutation.isPending}
+												title="Desativar Projeto"
+											>
+												{deactivateAdminProjectMutation.isPending ? (
+													<Loader2 className="h-4 w-4 animate-spin" />
+												) : (
+													<ToggleRight className="h-4 w-4" />
+												)}
+											</Button>
+										) : (
+											<Button
+												variant="ghost"
+												size="icon"
+												className="text-star-muted hover:text-primary hover:bg-primary/10 cursor-pointer transition-colors"
+												onClick={() => {
+													setProjectToActivate(project);
+												}}
+												disabled={activateAdminProjectMutation.isPending}
+												title="Ativar Projeto"
+											>
+												{activateAdminProjectMutation.isPending ? (
+													<Loader2 className="h-4 w-4 animate-spin" />
+												) : (
+													<ToggleLeft className="h-4 w-4" />
+												)}
+											</Button>
+										)}
+
 										<Button
 											variant="ghost"
 											size="icon"
@@ -195,6 +303,73 @@ const AdminProjects = () => {
 					)}
 				</main>
 			</div>
+
+			{/* Deactivate project Confirmation Modal */}
+			<Modal
+				isOpen={!!projectToDeactivate}
+				onClose={() => setProjectToDeactivate(null)}
+			>
+				<ModalContent>
+					<ModalHeader>
+						<ModalTitle>Desativar projeto</ModalTitle>
+						<ModalDescription>
+							Tem certeza que deseja desativar o projeto{" "}
+							{projectToDeactivate?.title}?
+						</ModalDescription>
+					</ModalHeader>
+					<ModalFooter>
+						<Button
+							variant="secondary"
+							onClick={() => setProjectToDeactivate(null)}
+							className="cursor-pointer"
+						>
+							Cancelar
+						</Button>
+						<Button
+							variant="destructive"
+							onClick={handleDeactivate}
+							isLoading={deactivateAdminProjectMutation.isPending}
+							className="cursor-pointer"
+						>
+							Desativar
+						</Button>
+					</ModalFooter>
+				</ModalContent>
+			</Modal>
+
+			{/* Activate project Confirmation Modal */}
+			<Modal
+				isOpen={!!projectToActivate}
+				onClose={() => setProjectToActivate(null)}
+			>
+				<ModalContent>
+					<ModalHeader>
+						<ModalTitle>Ativar projeto</ModalTitle>
+						<ModalDescription>
+							Tem certeza que deseja ativar o projeto {projectToActivate?.title}
+							?
+						</ModalDescription>
+					</ModalHeader>
+					<ModalFooter>
+						<Button
+							variant="secondary"
+							onClick={() => setProjectToActivate(null)}
+							className="cursor-pointer"
+						>
+							Cancelar
+						</Button>
+						<Button
+							variant="primary"
+							onClick={handleActivate}
+							isLoading={activateAdminProjectMutation.isPending}
+							className="cursor-pointer"
+						>
+							Ativar
+						</Button>
+					</ModalFooter>
+				</ModalContent>
+			</Modal>
+
 			{isOpenConfirmRemoval && projectForRemoval ? (
 				<ConfirmRemoval
 					isOpen={isOpenConfirmRemoval}

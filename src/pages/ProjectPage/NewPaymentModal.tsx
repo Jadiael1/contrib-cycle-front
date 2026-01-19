@@ -9,7 +9,6 @@ import {
 	ModalFooter,
 } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
-import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { usePaymentOptions } from "@/hooks/usePaymentOptions";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,7 +41,6 @@ export default function NewPaymentModal({
 	const [month, setMonth] = useState(String(currentMonth));
 	const [weekOfMonth, setWeekOfMonth] = useState("1");
 	const [sequence, setSequence] = useState("1");
-	const [paidAt, setPaidAt] = useState(new Date().toISOString().split("T")[0]);
 	const [receipt, setReceipt] = useState<File | null>(null);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -55,12 +53,16 @@ export default function NewPaymentModal({
 
 	useEffect(() => {
 		if (paymentInterval !== "week") return;
-		const firstWeek = options?.weeks?.[0]?.value ?? 1;
-		const nextWeek = String(firstWeek);
-		if (weekOfMonth !== nextWeek) {
-			setWeekOfMonth(nextWeek);
-		}
-	}, [month, year, paymentInterval, options?.weeks, weekOfMonth]);
+		if (!options?.weeks?.length) return;
+
+		setWeekOfMonth((current) => {
+			const hasCurrent = options.weeks.some(
+				(week) => String(week.value) === current,
+			);
+			if (hasCurrent) return current;
+			return String(options.weeks[0].value);
+		});
+	}, [paymentInterval, options?.weeks]);
 
 	const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
@@ -89,7 +91,6 @@ export default function NewPaymentModal({
 			newErrors.weekOfMonth = "Selecione a semana";
 		}
 		if (!sequence) newErrors.sequence = "Selecione a sequência";
-		if (!paidAt) newErrors.paidAt = "Informe a data do pagamento";
 
 		if (Object.keys(newErrors).length > 0) {
 			setErrors(newErrors);
@@ -99,7 +100,6 @@ export default function NewPaymentModal({
 		const formData = new FormData();
 		formData.append("year", year);
 		formData.append("sequence", sequence);
-		formData.append("paid_at", paidAt);
 
 		if (paymentInterval === "week" || paymentInterval === "month") {
 			formData.append("month", month);
@@ -221,15 +221,6 @@ export default function NewPaymentModal({
 							onChange={(e) => setSequence(e.target.value)}
 							error={errors.sequence}
 							options={sequenceOptions}
-						/>
-
-						<Input
-							id="dayOfPayment"
-							label="Data do Pagamento"
-							type="date"
-							value={paidAt}
-							onChange={(e) => setPaidAt(e.target.value)}
-							error={errors.paidAt}
 						/>
 					</div>
 

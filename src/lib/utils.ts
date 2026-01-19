@@ -5,6 +5,19 @@ export const cn = (...inputs: ClassValue[]) => {
 	return twMerge(clsx(inputs));
 };
 
+export function formatDate1(date: string | null): string {
+	if (!date) return "-";
+	return new Intl.DateTimeFormat("pt-BR", {
+		day: "2-digit",
+		month: "2-digit",
+		year: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+		second: "2-digit",
+		timeZone: "UTC",
+	}).format(new Date(date));
+}
+
 export function formatDate(date: string | null): string {
 	if (!date) return "-";
 	return new Intl.DateTimeFormat("pt-BR", {

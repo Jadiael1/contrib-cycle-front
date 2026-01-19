@@ -385,7 +385,7 @@ export default function AdminProjectNew() {
 								<Button
 									type="submit"
 									isLoading={createMutation.isPending}
-									className="flex-1"
+									className="flex-1 cursor-pointer"
 								>
 									Criar Projeto
 								</Button>

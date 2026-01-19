@@ -20,7 +20,7 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
         <p className="text-sm text-star-muted max-w-sm mb-4">{description}</p>
       )}
       {action && (
-        <Button variant="secondary" onClick={action.onClick}>
+        <Button variant="secondary" onClick={action.onClick} className="cursor-pointer">
           {action.label}
         </Button>
       )}

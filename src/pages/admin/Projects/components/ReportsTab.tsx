@@ -18,7 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useGenerateReport } from "@/hooks/useGenerateReport";
 import { useToast } from "@/hooks/useToast";
 import { downloadFileWithToken } from "@/lib/downloadFileWithToken";
-import { formatDate } from "@/lib/utils";
+import { formatDate1 } from "@/lib/utils";
 import { Download, FileText, Plus, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
@@ -143,7 +143,7 @@ const ReportsTab = ({
 									<div className="flex items-center gap-2 mb-1">
 										{getReportStatusBadge(report.status)}
 										<span className="text-sm text-star-muted">
-											{formatDate(report.created_at)}
+											{formatDate1(report.created_at)}
 										</span>
 									</div>
 									<p className="text-sm text-star-dim">

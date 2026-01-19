@@ -57,6 +57,11 @@ const ProjectModal = ({
 			return;
 		}
 		await signin({ phone: phoneRes.value });
+		toast({
+			title: "Sucesso",
+			description: "Login realizado com sucesso.",
+			variant: "default",
+		});
 	};
 
 	const handleSignUp = async () => {

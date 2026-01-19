@@ -29,7 +29,11 @@ const ConfirmParticipation = ({
 					</ModalDescription>
 				</ModalHeader>
 				<ModalFooter>
-					<Button variant="secondary" onClick={() => onClose()}>
+					<Button
+						variant="secondary"
+						className="cursor-pointer"
+						onClick={() => onClose()}
+					>
 						Cancelar
 					</Button>
 					<Button
@@ -38,6 +42,7 @@ const ConfirmParticipation = ({
 							onConfirm();
 						}}
 						isLoading={isPending}
+						className="cursor-pointer"
 					>
 						Participar
 					</Button>

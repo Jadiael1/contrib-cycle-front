@@ -23,14 +23,27 @@ const fetchData = async (endpoint: string, token: string) => {
 	}
 };
 
+type TProjectRef = {
+	projectId: number;
+	projectSlug?: string;
+};
+
 export const useDeactivateAdminProject = (token: string) => {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: (projectId: number) =>
+		mutationFn: ({ projectId }: TProjectRef) =>
 			fetchData(`/admin/projects/${projectId}/deactivate`, token),
-		onSuccess: () => {
+		onSuccess: (_data, variables) => {
 			queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
 			queryClient.invalidateQueries({ queryKey: ["all-projects"] });
+			queryClient.invalidateQueries({
+				queryKey: ["admin-project", variables.projectId],
+			});
+			if (variables.projectSlug) {
+				queryClient.invalidateQueries({
+					queryKey: ["project", variables.projectSlug],
+				});
+			}
 		},
 	});
 };

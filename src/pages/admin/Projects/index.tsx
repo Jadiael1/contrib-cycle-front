@@ -63,15 +63,21 @@ const AdminProjects = () => {
 	const deactivateAdminProjectMutation = useDeactivateAdminProject(adminToken!);
 	const activateAdminProjectMutation = useActivateAdminProject(adminToken!);
 
-	const handleDelete = (projectId: number) => {
-		deleteAdminProjectMutation.mutate(projectId);
+	const handleDelete = (project: IAdminProjects) => {
+		deleteAdminProjectMutation.mutate({
+			projectId: project.id,
+			projectSlug: project.slug,
+		});
 		setProjectForRemoval(null);
 	};
 
 	const handleDeactivate = async () => {
 		if (!projectToDeactivate) return;
 		try {
-			await deactivateAdminProjectMutation.mutateAsync(projectToDeactivate.id);
+			await deactivateAdminProjectMutation.mutateAsync({
+				projectId: projectToDeactivate.id,
+				projectSlug: projectToDeactivate.slug,
+			});
 			if (deactivateAdminProjectMutation.error) {
 				throw new Error(
 					`HTTP error! status: ${deactivateAdminProjectMutation.error.message}`,
@@ -97,7 +103,10 @@ const AdminProjects = () => {
 	const handleActivate = async () => {
 		if (!projectToActivate) return;
 		try {
-			await activateAdminProjectMutation.mutateAsync(projectToActivate.id);
+			await activateAdminProjectMutation.mutateAsync({
+				projectId: projectToActivate.id,
+				projectSlug: projectToActivate.slug,
+			});
 			if (activateAdminProjectMutation.error) {
 				throw new Error(
 					`HTTP error! status: ${activateAdminProjectMutation.error.message}`,
@@ -285,12 +294,14 @@ const AdminProjects = () => {
 											}}
 											disabled={
 												deleteAdminProjectMutation.isPending &&
-												deleteAdminProjectMutation.variables === project.id
+												deleteAdminProjectMutation.variables?.projectId ===
+													project.id
 											}
 											title="Remover Projeto"
 										>
 											{deleteAdminProjectMutation.isPending &&
-											deleteAdminProjectMutation.variables === project.id ? (
+											deleteAdminProjectMutation.variables?.projectId ===
+												project.id ? (
 												<Loader2 className="h-4 w-4 animate-spin" />
 											) : (
 												<Trash2 className="h-4 w-4" />
@@ -374,7 +385,7 @@ const AdminProjects = () => {
 				<ConfirmRemoval
 					isOpen={isOpenConfirmRemoval}
 					onClose={() => setIsOpenConfirmRemoval(false)}
-					onConfirm={() => handleDelete(projectForRemoval.id)}
+					onConfirm={() => handleDelete(projectForRemoval)}
 					isPending={deleteAdminProjectMutation.isPending}
 				/>
 			) : null}

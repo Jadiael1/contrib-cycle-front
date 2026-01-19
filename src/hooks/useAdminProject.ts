@@ -42,7 +42,7 @@ const fetchData = async (
 
 export const useAdminProject = (projectId: number, token: string) => {
 	const query = useQuery({
-		queryKey: [`admin-project`],
+		queryKey: ["admin-project", projectId],
 		queryFn: () => fetchData(`/admin/projects/${projectId}`, token),
 	});
 	return query;

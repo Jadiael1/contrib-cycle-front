@@ -245,46 +245,48 @@ const PaymentMethodsTab = ({ projectId }: { projectId: number }) => {
 										</div>
 									</div>
 
-									{/* Ação de Excluir/Restaurar */}
-									{method.is_active ? (
+									<div className="flex">
+										{/* Ação de Excluir/Restaurar */}
+										{method.is_active ? (
+											<Button
+												variant="ghost"
+												size="icon"
+												className="text-star-muted hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors cursor-pointer shrink-0"
+												title="Desativar método"
+												onClick={() => {
+													setIsDeactivatePaymentMethodModalOpen(true);
+													setPaymentMethodToDeactivate(method);
+												}}
+											>
+												<ToggleRight className="h-4 w-4 text-destructive" />
+											</Button>
+										) : (
+											<Button
+												variant="ghost"
+												size="icon"
+												className="text-star-muted hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors cursor-pointer shrink-0"
+												title="Restaurar método"
+												onClick={() => {
+													setIsActivatePaymentMethodModalOpen(true);
+													setPaymentMethodToActivate(method);
+												}}
+											>
+												<ToggleLeft className="h-4 w-4 text-primary" />
+											</Button>
+										)}
 										<Button
 											variant="ghost"
 											size="icon"
 											className="text-star-muted hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors cursor-pointer shrink-0"
-											title="Desativar método"
+											title="Remover método"
 											onClick={() => {
-												setIsDeactivatePaymentMethodModalOpen(true);
-												setPaymentMethodToDeactivate(method);
+												setIsRemovePaymentMethodModalOpen(true);
+												setPaymentMethodToRemove(method);
 											}}
 										>
-											<ToggleRight className="h-4 w-4" />
+											<Trash2 className="h-4 w-4 text-primary" />
 										</Button>
-									) : (
-										<Button
-											variant="ghost"
-											size="icon"
-											className="text-star-muted hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors cursor-pointer shrink-0"
-											title="Restaurar método"
-											onClick={() => {
-												setIsActivatePaymentMethodModalOpen(true);
-												setPaymentMethodToActivate(method);
-											}}
-										>
-											<ToggleLeft className="h-4 w-4 text-primary" />
-										</Button>
-									)}
-									<Button
-										variant="ghost"
-										size="icon"
-										className="text-star-muted hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors cursor-pointer shrink-0"
-										title="Remover método"
-										onClick={() => {
-											setIsRemovePaymentMethodModalOpen(true);
-											setPaymentMethodToRemove(method);
-										}}
-									>
-										<Trash2 className="h-4 w-4 text-primary" />
-									</Button>
+									</div>
 								</div>
 
 								{/* Linha decorativa de hover (opcional para estilo) */}

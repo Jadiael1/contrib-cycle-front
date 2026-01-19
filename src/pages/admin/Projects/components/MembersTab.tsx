@@ -13,21 +13,25 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState, ErrorState } from "@/components/ui/States";
 import { useAdminMembers } from "@/hooks/useAdminMembers";
 import { useAuth } from "@/hooks/useAuth";
-import { useRemoveMember } from "@/hooks/useRemoveMember";
+import { useDeactivateMember } from "@/hooks/useDeactivateMember";
 import { useRestoreMember } from "@/hooks/useRestoreMember";
 import { useToast } from "@/hooks/useToast";
 import type { IAdminProjectMember } from "@/interfaces/IAdminProjectMember";
 import { formatPhone, getStatusLabel } from "@/lib/utils";
 import {
-	Ban,
+	BadgeCheck,
 	ChevronLeft,
 	ChevronRight,
-	RotateCcw,
 	Search,
+	ToggleLeft,
+	ToggleRight,
+	Trash2,
 	Users,
 } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
+import { useActivateMember } from "@/hooks/useActivateMember";
+import { useRemoveMember } from "@/hooks/useRemoveMember";
 
 const MembersTab = ({ projectId }: { projectId: number }) => {
 	const { toast } = useToast();
@@ -35,9 +39,13 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 	const [search, setSearch] = useState("");
 	const [page, setPage] = useState(1);
 	const { adminToken } = useAuth();
-	const [memberToRemove, setMemberToRemove] =
+	const [memberToDeactivate, setMemberToDeactivate] =
 		useState<IAdminProjectMember | null>(null);
 	const [memberToRestore, setMemberToRestore] =
+		useState<IAdminProjectMember | null>(null);
+	const [memberToActivate, setMemberToActivate] =
+		useState<IAdminProjectMember | null>(null);
+	const [memberToRemove, setMemberToRemove] =
 		useState<IAdminProjectMember | null>(null);
 
 	const { data, isLoading, error, refetch } = useAdminMembers(
@@ -47,8 +55,10 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 		status,
 		search,
 	);
-	const removeMutation = useRemoveMember(projectId, adminToken!);
+	const deactivateMemberMutation = useDeactivateMember(projectId, adminToken!);
 	const restoreMutation = useRestoreMember(projectId, adminToken!);
+	const activateMemberMutation = useActivateMember(projectId, adminToken!);
+	const removeMemberMutation = useRemoveMember(projectId, adminToken!);
 
 	const handleRestore = async () => {
 		if (!memberToRestore) return;
@@ -75,19 +85,74 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 		}
 	};
 
+	const handleDeactivate = async () => {
+		if (!memberToDeactivate) return;
+		try {
+			await deactivateMemberMutation.mutateAsync(memberToDeactivate.user.id);
+			if (deactivateMemberMutation.error) {
+				throw new Error(
+					`HTTP error! status: ${deactivateMemberMutation.error.message}`,
+				);
+			}
+			toast({
+				title: "Sucesso",
+				description: "Membro desativado com sucesso.",
+				variant: "default",
+			});
+			refetch();
+		} catch {
+			toast({
+				title: "Error",
+				description: "Erro ao desativar membro.",
+				variant: "destructive",
+			});
+		} finally {
+			setMemberToDeactivate(null);
+			deactivateMemberMutation.reset();
+		}
+	};
+
+	const handleActive = async () => {
+		if (!memberToActivate) return;
+		try {
+			await activateMemberMutation.mutateAsync(memberToActivate.user.id);
+			if (activateMemberMutation.error) {
+				throw new Error(
+					`HTTP error! status: ${activateMemberMutation.error.message}`,
+				);
+			}
+			toast({
+				title: "Sucesso",
+				description: "Membro aprovado com sucesso.",
+				variant: "default",
+			});
+			refetch();
+		} catch {
+			toast({
+				title: "Error",
+				description: "Erro ao aprovar membro.",
+				variant: "destructive",
+			});
+		} finally {
+			setMemberToActivate(null);
+			activateMemberMutation.reset();
+		}
+	};
+
 	const handleRemove = async () => {
 		if (!memberToRemove) return;
 		try {
-			await removeMutation.mutateAsync(memberToRemove.user.id);
-			if (removeMutation.error) {
-				throw new Error(`HTTP error! status: ${removeMutation.error.message}`);
+			await removeMemberMutation.mutateAsync(memberToRemove.user.id);
+			if (removeMemberMutation.error) {
+				throw new Error(
+					`HTTP error! status: ${removeMemberMutation.error.message}`,
+				);
 			}
 			toast({
 				title: "Sucesso",
 				description: "Membro removido com sucesso.",
 				variant: "default",
 			});
-			setMemberToRemove(null);
 			refetch();
 		} catch {
 			toast({
@@ -96,7 +161,8 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 				variant: "destructive",
 			});
 		} finally {
-			removeMutation.reset();
+			setMemberToRemove(null);
+			removeMemberMutation.reset();
 		}
 	};
 
@@ -115,7 +181,7 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 							options={[
 								{ value: "accepted", label: "Confirmados" },
 								{ value: "pending", label: "Pendentes" },
-								{ value: "removed", label: "Removidos" },
+								{ value: "removed", label: "Desativados" },
 							]}
 						/>
 					</div>
@@ -202,14 +268,26 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 										>
 											{getStatusLabel(member.status)}
 										</Badge>
-										{member.status !== "removed" && (
+										<Button
+											variant="ghost"
+											size="icon"
+											onClick={() => {
+												setMemberToRemove(member);
+											}}
+											className="cursor-pointer"
+											title="Deletar Usuario"
+										>
+											<Trash2 className="h-4 w-4 text-destructive" />
+										</Button>
+										{member.status === "accepted" && (
 											<Button
 												variant="ghost"
 												size="icon"
-												onClick={() => setMemberToRemove(member)}
+												onClick={() => setMemberToDeactivate(member)}
 												className="cursor-pointer"
+												title="Desativar Usuario"
 											>
-												<Ban className="h-4 w-4 text-destructive" />
+												<ToggleRight className="h-4 w-4 text-destructive" />
 											</Button>
 										)}
 										{member.status === "removed" && (
@@ -220,8 +298,22 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 													setMemberToRestore(member);
 												}}
 												className="cursor-pointer"
+												title="Ativar Usuario"
 											>
-												<RotateCcw className="h-4 w-4 text-primary" />
+												<ToggleLeft className="h-4 w-4 text-primary" />
+											</Button>
+										)}
+										{member.status === "pending" && (
+											<Button
+												variant="ghost"
+												size="icon"
+												onClick={() => {
+													setMemberToActivate(member);
+												}}
+												className="cursor-pointer"
+												title="Aprovar Usuario"
+											>
+												<BadgeCheck className="h-4 w-4 text-primary" />
 											</Button>
 										)}
 									</div>
@@ -238,6 +330,7 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 								<div className="flex gap-2">
 									<Button
 										variant="secondary"
+										className="cursor-pointer"
 										size="sm"
 										disabled={page === 1}
 										onClick={() => setPage((p) => p - 1)}
@@ -246,6 +339,7 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 									</Button>
 									<Button
 										variant="secondary"
+										className="cursor-pointer"
 										size="sm"
 										disabled={page === data.meta.last_page}
 										onClick={() => setPage((p) => p + 1)}
@@ -276,6 +370,7 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 					<ModalFooter>
 						<Button
 							variant="secondary"
+							className="cursor-pointer"
 							onClick={() => setMemberToRestore(null)}
 						>
 							Cancelar
@@ -292,24 +387,96 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 				</ModalContent>
 			</Modal>
 
-			{/* Remove Confirmation Modal */}
+			{/* Deactivate Confirmation Modal */}
+			<Modal
+				isOpen={!!memberToDeactivate}
+				onClose={() => setMemberToDeactivate(null)}
+			>
+				<ModalContent>
+					<ModalHeader>
+						<ModalTitle>Desativar Membro</ModalTitle>
+						<ModalDescription>
+							Tem certeza que deseja desativar{" "}
+							{memberToDeactivate?.user.first_name}{" "}
+							{memberToDeactivate?.user.last_name} do projeto?
+						</ModalDescription>
+					</ModalHeader>
+					<ModalFooter>
+						<Button
+							variant="secondary"
+							className="cursor-pointer"
+							onClick={() => setMemberToDeactivate(null)}
+						>
+							Cancelar
+						</Button>
+						<Button
+							variant="destructive"
+							onClick={handleDeactivate}
+							isLoading={deactivateMemberMutation.isPending}
+							className="cursor-pointer"
+						>
+							Desativar
+						</Button>
+					</ModalFooter>
+				</ModalContent>
+			</Modal>
+
+			{/* Activate member Confirmation Modal */}
+			<Modal
+				isOpen={!!memberToActivate}
+				onClose={() => setMemberToActivate(null)}
+			>
+				<ModalContent>
+					<ModalHeader>
+						<ModalTitle>Aprovar Membro</ModalTitle>
+						<ModalDescription>
+							Tem certeza que deseja aprovar {memberToActivate?.user.first_name}{" "}
+							{memberToActivate?.user.last_name} no projeto?
+						</ModalDescription>
+					</ModalHeader>
+					<ModalFooter>
+						<Button
+							variant="secondary"
+							onClick={() => setMemberToActivate(null)}
+							className="cursor-pointer"
+						>
+							Cancelar
+						</Button>
+						<Button
+							variant="primary"
+							onClick={handleActive}
+							isLoading={activateMemberMutation.isPending}
+							className="cursor-pointer"
+						>
+							Aprovar
+						</Button>
+					</ModalFooter>
+				</ModalContent>
+			</Modal>
+
+			{/* Remove member Confirmation Modal */}
 			<Modal isOpen={!!memberToRemove} onClose={() => setMemberToRemove(null)}>
 				<ModalContent>
 					<ModalHeader>
 						<ModalTitle>Remover Membro</ModalTitle>
 						<ModalDescription>
-							Tem certeza que deseja remover {memberToRemove?.user.first_name}{" "}
-							{memberToRemove?.user.last_name} do projeto?
+							Tem certeza que deseja remover {memberToActivate?.user.first_name}{" "}
+							{memberToActivate?.user.last_name} do projeto?
 						</ModalDescription>
 					</ModalHeader>
 					<ModalFooter>
-						<Button variant="secondary" onClick={() => setMemberToRemove(null)}>
+						<Button
+							variant="secondary"
+							onClick={() => setMemberToRemove(null)}
+							className="cursor-pointer"
+						>
 							Cancelar
 						</Button>
 						<Button
 							variant="destructive"
 							onClick={handleRemove}
-							isLoading={removeMutation.isPending}
+							isLoading={removeMemberMutation.isPending}
+							className="cursor-pointer"
 						>
 							Remover
 						</Button>

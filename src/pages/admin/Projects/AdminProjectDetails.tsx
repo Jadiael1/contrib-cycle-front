@@ -138,7 +138,7 @@ const AdminProjectDetails = () => {
 											</Badge>
 										) : null}
 										{counts?.removed ? (
-											<Badge variant="error">{counts.removed} removidos</Badge>
+											<Badge variant="error">{counts.removed} desativados</Badge>
 										) : null}
 										{stats?.is_full ? (
 											<Badge variant="info">Lotado</Badge>

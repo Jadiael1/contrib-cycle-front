@@ -47,7 +47,7 @@ export function getStatusLabel(status: string | null): string {
 	const labels: Record<string, string> = {
 		pending: "Pendente",
 		accepted: "Confirmado",
-		removed: "Removido",
+		removed: "Desativado",
 		processing: "Processando",
 		completed: "Concluído",
 		failed: "Falhou",

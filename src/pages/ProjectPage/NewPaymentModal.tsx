@@ -264,10 +264,18 @@ export default function NewPaymentModal({
 				</div>
 
 				<ModalFooter>
-					<Button variant="secondary" onClick={onClose}>
+					<Button
+						variant="secondary"
+						className="cursor-pointer"
+						onClick={onClose}
+					>
 						Cancelar
 					</Button>
-					<Button onClick={handleSubmit} isLoading={createMutation.isPending}>
+					<Button
+						onClick={handleSubmit}
+						className="cursor-pointer"
+						isLoading={createMutation.isPending}
+					>
 						Registrar
 					</Button>
 				</ModalFooter>

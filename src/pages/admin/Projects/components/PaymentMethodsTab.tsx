@@ -30,7 +30,13 @@ import {
 import { useState } from "react";
 import CreatePaymentMethod from "@/pages/admin/Projects/components/CreatePaymentMethod";
 
-const PaymentMethodsTab = ({ projectId }: { projectId: number }) => {
+const PaymentMethodsTab = ({
+	projectId,
+	projectSlug,
+}: {
+	projectId: number;
+	projectSlug?: string;
+}) => {
 	const { toast } = useToast();
 	const [
 		isDeactivatePaymentMethodModalOpen,
@@ -60,12 +66,18 @@ const PaymentMethodsTab = ({ projectId }: { projectId: number }) => {
 	const deactivatePaymentMutation = useDeactivatePaymentMethod(
 		projectId,
 		adminToken!,
+		projectSlug,
 	);
 	const activatePaymentMutation = useActivatePaymentMethod(
 		projectId,
 		adminToken!,
+		projectSlug,
 	);
-	const removePaymentMutation = useRemovePaymentMethod(projectId, adminToken!);
+	const removePaymentMutation = useRemovePaymentMethod(
+		projectId,
+		adminToken!,
+		projectSlug,
+	);
 
 	const handleDeactivatePaymentMethod = async (paymentMethodId: number) => {
 		try {
@@ -308,6 +320,7 @@ const PaymentMethodsTab = ({ projectId }: { projectId: number }) => {
 				closeModal={() => setIsCreatePaymentMethodModalOpen(false)}
 				isCreatePaymentMethodModalOpen={isCreatePaymentMethodModalOpen}
 				projectId={projectId}
+				projectSlug={projectSlug}
 			/>
 
 			{/* Deactivate Payment Method Modal */}

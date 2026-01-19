@@ -181,10 +181,13 @@ const AdminProjectDetails = () => {
 						</TabsList>
 
 						<TabsContent value="members">
-							<MembersTab projectId={numericId} />
+							<MembersTab projectId={numericId} projectSlug={project.slug} />
 						</TabsContent>
 						<TabsContent value="methods">
-							<PaymentMethodsTab projectId={numericId} />
+							<PaymentMethodsTab
+								projectId={numericId}
+								projectSlug={project.slug}
+							/>
 						</TabsContent>
 						<TabsContent value="reports">
 							<ReportsTab

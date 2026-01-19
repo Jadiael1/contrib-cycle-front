@@ -22,6 +22,7 @@ type TCreatePaymentMethodProps = {
 	isCreatePaymentMethodModalOpen: boolean;
 	closeModal: () => void;
 	projectId: number;
+	projectSlug?: string;
 };
 
 type TCreateForm = {
@@ -42,6 +43,7 @@ const CreatePaymentMethod = ({
 	isCreatePaymentMethodModalOpen,
 	closeModal,
 	projectId,
+	projectSlug,
 }: TCreatePaymentMethodProps) => {
 	const [createErrors, setCreateErrors] = useState<Record<string, string>>({});
 	const [createMethodType, setCreateMethodType] =
@@ -60,7 +62,11 @@ const CreatePaymentMethod = ({
 	});
 	const { toast } = useToast();
 	const { adminToken } = useAuth();
-	const createPaymentMutation = useCreatePaymentMethod(projectId, adminToken!);
+	const createPaymentMutation = useCreatePaymentMethod(
+		projectId,
+		adminToken!,
+		projectSlug,
+	);
 	if (!isCreatePaymentMethodModalOpen) return;
 
 	const resetCreateForm = () => {

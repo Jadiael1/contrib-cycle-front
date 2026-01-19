@@ -25,7 +25,11 @@ const fetchData = async (
 	}
 };
 
-export const useRemoveMember = (projectId: number, token: string) => {
+export const useRemoveMember = (
+	projectId: number,
+	token: string,
+	projectSlug?: string,
+) => {
 	const queryClient = useQueryClient();
 
 	const mutation = useMutation({
@@ -34,6 +38,9 @@ export const useRemoveMember = (projectId: number, token: string) => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["admin-members", projectId] });
 			queryClient.invalidateQueries({ queryKey: ["admin-project", projectId] });
+			if (projectSlug) {
+				queryClient.invalidateQueries({ queryKey: ["project", projectSlug] });
+			}
 		},
 	});
 	return mutation;

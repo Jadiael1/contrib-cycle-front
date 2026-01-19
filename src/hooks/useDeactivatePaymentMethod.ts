@@ -26,6 +26,7 @@ const fetchData = async (endpoint: string, token: string) => {
 export const useDeactivatePaymentMethod = (
 	projectId: number,
 	token: string,
+	projectSlug?: string,
 ) => {
 	const queryClient = useQueryClient();
 	return useMutation({
@@ -35,8 +36,13 @@ export const useDeactivatePaymentMethod = (
 				token,
 			),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["payments"] });
-			queryClient.invalidateQueries({ queryKey: [`admin-payment-methods`] });
+			queryClient.invalidateQueries({
+				queryKey: ["admin-payment-methods", projectId],
+			});
+			queryClient.invalidateQueries({ queryKey: ["all-projects"] });
+			if (projectSlug) {
+				queryClient.invalidateQueries({ queryKey: ["project", projectSlug] });
+			}
 		},
 	});
 };

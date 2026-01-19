@@ -23,7 +23,11 @@ const fetchData = async (endpoint: string, token: string) => {
 	}
 };
 
-export const useActivateMember = (projectId: number, token: string) => {
+export const useActivateMember = (
+	projectId: number,
+	token: string,
+	projectSlug?: string,
+) => {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (userId: number) =>
@@ -32,8 +36,11 @@ export const useActivateMember = (projectId: number, token: string) => {
 				token,
 			),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["admin-members"] });
-			queryClient.invalidateQueries({ queryKey: [`admin-project`] });
+			queryClient.invalidateQueries({ queryKey: ["admin-members", projectId] });
+			queryClient.invalidateQueries({ queryKey: ["admin-project", projectId] });
+			if (projectSlug) {
+				queryClient.invalidateQueries({ queryKey: ["project", projectSlug] });
+			}
 		},
 	});
 };

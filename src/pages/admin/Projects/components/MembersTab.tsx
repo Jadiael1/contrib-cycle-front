@@ -33,7 +33,13 @@ import { Badge } from "@/components/ui/Badge";
 import { useActivateMember } from "@/hooks/useActivateMember";
 import { useRemoveMember } from "@/hooks/useRemoveMember";
 
-const MembersTab = ({ projectId }: { projectId: number }) => {
+const MembersTab = ({
+	projectId,
+	projectSlug,
+}: {
+	projectId: number;
+	projectSlug?: string;
+}) => {
 	const { toast } = useToast();
 	const [status, setStatus] = useState("accepted");
 	const [search, setSearch] = useState("");
@@ -55,10 +61,22 @@ const MembersTab = ({ projectId }: { projectId: number }) => {
 		status,
 		search,
 	);
-	const deactivateMemberMutation = useDeactivateMember(projectId, adminToken!);
-	const restoreMutation = useRestoreMember(projectId, adminToken!);
-	const activateMemberMutation = useActivateMember(projectId, adminToken!);
-	const removeMemberMutation = useRemoveMember(projectId, adminToken!);
+	const deactivateMemberMutation = useDeactivateMember(
+		projectId,
+		adminToken!,
+		projectSlug,
+	);
+	const restoreMutation = useRestoreMember(projectId, adminToken!, projectSlug);
+	const activateMemberMutation = useActivateMember(
+		projectId,
+		adminToken!,
+		projectSlug,
+	);
+	const removeMemberMutation = useRemoveMember(
+		projectId,
+		adminToken!,
+		projectSlug,
+	);
 
 	const handleRestore = async () => {
 		if (!memberToRestore) return;

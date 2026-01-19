@@ -23,7 +23,11 @@ const fetchData = async (endpoint: string, token: string) => {
 	}
 };
 
-export const useRemovePaymentMethod = (projectId: number, token: string) => {
+export const useRemovePaymentMethod = (
+	projectId: number,
+	token: string,
+	projectSlug?: string,
+) => {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (paymentId: number) =>
@@ -32,8 +36,13 @@ export const useRemovePaymentMethod = (projectId: number, token: string) => {
 				token,
 			),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["payments"] });
-			queryClient.invalidateQueries({ queryKey: [`admin-payment-methods`] });
+			queryClient.invalidateQueries({
+				queryKey: ["admin-payment-methods", projectId],
+			});
+			queryClient.invalidateQueries({ queryKey: ["all-projects"] });
+			if (projectSlug) {
+				queryClient.invalidateQueries({ queryKey: ["project", projectSlug] });
+			}
 		},
 	});
 };

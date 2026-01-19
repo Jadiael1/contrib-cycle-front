@@ -15,6 +15,7 @@ import {
 import { Button } from "../ui/Button";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
+import { normalizePhone } from "@/lib/phoneBR";
 const API_BASE_URL_FALLBACK = "http://localhost:8000";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || API_BASE_URL_FALLBACK;
 const API_PREFIX = `${API_BASE_URL}/api/v1`;
@@ -46,7 +47,16 @@ const ProjectModal = ({
 	const labelClassName = "text-xs uppercase tracking-[0.2em] text-star-muted";
 
 	const handleSignIn = async () => {
-		await signin({ phone: signinPhone });
+		const phoneRes = normalizePhone(signinPhone);
+		if (!phoneRes.ok) {
+			toast({
+				title: "Erro",
+				description: phoneRes.reason,
+				variant: "destructive",
+			});
+			return;
+		}
+		await signin({ phone: phoneRes.value });
 	};
 
 	const handleSignUp = async () => {
@@ -57,6 +67,16 @@ const ProjectModal = ({
 		) {
 			return;
 		}
+		const phoneRes = normalizePhone(signupPhone);
+		if (!phoneRes.ok) {
+			toast({
+				title: "Erro",
+				description: phoneRes.reason,
+				variant: "destructive",
+			});
+			return;
+		}
+
 		try {
 			const req = await fetch(`${API_PREFIX}/auth/participant/register`, {
 				method: "POST",
@@ -65,7 +85,7 @@ const ProjectModal = ({
 					Accept: "application/json",
 				},
 				body: JSON.stringify({
-					phone: signupPhone,
+					phone: phoneRes.value,
 					first_name: signupName,
 					last_name: signupLastName,
 				}),
@@ -155,10 +175,10 @@ const ProjectModal = ({
 								<p className="text-sm text-star-white">
 									Autentique em segundos com seu telefone.
 								</p>
-								<div className="flex items-center gap-2 text-xs text-star-dim">
+								{/* <div className="flex items-center gap-2 text-xs text-star-dim">
 									<Phone className="h-3.5 w-3.5 text-cosmic-cyan" />
 									Confirmacao via SMS
-								</div>
+								</div> */}
 							</div>
 							<div className="rounded-xl border border-border bg-space-nebula/70 p-4 space-y-3 w-full">
 								<div>
@@ -253,6 +273,11 @@ const ProjectModal = ({
 													id={`login-phone`}
 													value={signinPhone}
 													onChange={(evt) => setSigninPhone(evt.target.value)}
+													onBlur={(evt) => {
+														const targetValue = evt.target.value;
+														const normalized = normalizePhone(targetValue);
+														setSigninPhone(normalized.cleaned);
+													}}
 													type="tel"
 													inputMode="numeric"
 													autoComplete="tel"
@@ -266,7 +291,7 @@ const ProjectModal = ({
 											Use seu telefone para receber o codigo de acesso.
 										</div>
 										<Button
-											className="w-full"
+											className="w-full cursor-pointer"
 											type="submit"
 											onClick={handleSignIn}
 										>
@@ -292,6 +317,11 @@ const ProjectModal = ({
 													id={`register-phone`}
 													value={signupPhone}
 													onChange={(evt) => setSignupPhone(evt.target.value)}
+													onBlur={(evt) => {
+														const targetValue = evt.target.value;
+														const normalized = normalizePhone(targetValue);
+														setSignupPhone(normalized.cleaned);
+													}}
 													type="tel"
 													inputMode="numeric"
 													autoComplete="tel"
@@ -351,7 +381,7 @@ const ProjectModal = ({
 											Cadastro rapido para liberar sua vaga no projeto.
 										</div>
 										<Button
-											className="w-full"
+											className="w-full cursor-pointer"
 											type="submit"
 											onClick={handleSignUp}
 										>

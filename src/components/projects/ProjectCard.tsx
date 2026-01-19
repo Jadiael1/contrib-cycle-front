@@ -17,7 +17,7 @@ import { useNavigate } from "react-router";
 
 const ProjectCard = ({ project }: { project: ICollectiveProjectPublic }) => {
 	const [isOpen, setIsOpen] = useState(false);
-	const { participantUser } = useAuth();
+	const { participantUser, isLoading } = useAuth();
 	const navigate = useNavigate();
 	const handleOpen = () => {
 		if (participantUser) {
@@ -72,6 +72,7 @@ const ProjectCard = ({ project }: { project: ICollectiveProjectPublic }) => {
 							variant="outline"
 							className="w-full group-hover:border-cosmic-cyan group-hover:bg-cosmic-cyan/10 cursor-pointer"
 							onClick={handleOpen}
+							disabled={isLoading}
 						>
 							Abrir
 							<ArrowRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
@@ -79,7 +80,7 @@ const ProjectCard = ({ project }: { project: ICollectiveProjectPublic }) => {
 					</div>
 				</CardFooter>
 			</Card>
-			{!participantUser ? (
+			{!participantUser && !isLoading ? (
 				<>
 					{isOpen ? (
 						<ProjectModal setIsOpen={setIsOpen} project={project} />

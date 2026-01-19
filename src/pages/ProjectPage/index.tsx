@@ -204,6 +204,7 @@ const ProjectPage = () => {
 										setIsJoinConfirmationOpen(true);
 									}}
 									isLoading={joinMutation.isPending}
+									className="cursor-pointer"
 								>
 									Aceito participar
 								</Button>
